@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: foyer
+      POSTGRES_PASSWORD: foyer
+      POSTGRES_DB: foyer
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U foyer -d foyer"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: foyer
+      MINIO_ROOT_PASSWORD: foyerdevpassword
+    ports:
+      - "9000:9000" # S3 API
+      - "9001:9001" # web console (optional)
+    volumes:
+      - minio_data:/data
+
+volumes:
+  postgres_data:
+  minio_data:
